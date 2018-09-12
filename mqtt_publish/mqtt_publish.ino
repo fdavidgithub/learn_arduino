@@ -1,4 +1,4 @@
-/* MQTT Client: Subscrib
+/* MQTT Client: Publish
  * Francis David (www.fdavid.com.br) 
  * 
  * Build with IDE Arduino 1.8.4
@@ -10,31 +10,17 @@
  */
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
- 
+
+int counter=0;
+
 // Connect to the WiFi
 const char* ssid = "EnterTheMatrix";
 const char* password = "555escolhido";
-const char* mqtt_server = "192.168.15.10";
+const char* mqtt_server = "200.159.88.174";
 
-//Services
+//Services 
 WiFiClient espClient;
 PubSubClient mqtt_client(espClient);
- 
- 
-void callback(char* topic, byte* payload, unsigned int length) 
-{  
- Serial.print("Message arrived [");
- Serial.print(topic);
- Serial.print("] ");
- 
- for (int i=0;i<length;i++) {
-    char receivedChar = (char)payload[i];
-    Serial.print(receivedChar);    
-  }
- 
-  Serial.println();
-}
- 
  
 void reconnect() 
 {
@@ -45,9 +31,6 @@ void reconnect()
     // Attempt to connect
     if (mqtt_client.connect("ESP8266 Client")) {
       Serial.println("connected");
-      
-      // ... and subscribe to topic
-      mqtt_client.subscribe("debug");
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqtt_client.state());
@@ -57,22 +40,27 @@ void reconnect()
       delay(5000);
     }
  }
- 
 }
- 
-void setup() 
+
+void setup()
 {
  Serial.begin(9600);
  
  mqtt_client.setServer(mqtt_server, 1883);
- mqtt_client.setCallback(callback);
 }
  
 void loop()
 {
+ char msg[256];
+  
  if (!mqtt_client.connected()) {
   reconnect();
  }
+
+ sprintf(msg, "%d", counter);
+ mqtt_client.publish("esp", msg);
  
- mqtt_client.loop();
+ counter++;
+ delay(1000);
 }
+
